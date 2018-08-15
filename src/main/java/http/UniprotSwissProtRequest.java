@@ -13,7 +13,7 @@ import java.net.URL;
 public class UniprotSwissProtRequest {
 
     private String URL_GET_TXT_DATA = "https://www.uniprot.org/uniprot/";
-    private String EXTENSION_TXT_DATA = ".fasta";
+    private String EXTENSION_TXT_DATA = ".txt";
 
     public UniprotSwissProt getUniprotSwissProtDescription(String id){
         try {
@@ -54,15 +54,18 @@ public class UniprotSwissProtRequest {
         String identification = line.substring(0, 2);
         String[] data = line.split("   ");
 
+        if (identification.trim().equals(""))
+            identification = "SQ";
+
         switch (identification) {
             case "GN":
                 uniprot.setGene(data[1].replaceAll("Name=", ""));
                 break;
             case "OS":
-                uniprot.setOrganism(data[1]);
+                uniprot.setOrganism(uniprot.getOrganism() + " " + data[1]);
                 break;
             case "SQ":
-                uniprot.setSequence(data[1]);
+                uniprot.setSequence(uniprot.getSequence()==null?line.substring(2, line.length()):uniprot.getSequence() + System.getProperty("line.separator")+line.substring(2, line.length()));
                 break;
             case "DE":
                 if (data[1].contains("AltName:")) {

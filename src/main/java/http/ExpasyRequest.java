@@ -16,14 +16,14 @@ public class ExpasyRequest {
     private String URL_GET_TXT_DATA = "https://enzyme.expasy.org/EC/";
     private String EXTENSION_TXT_DATA = ".txt";
 
-    public Expasy getExpasyECData(String ec){
+    public Expasy getExpasyECData(String ec, boolean isGetUniProtAnnotation){
 
         try {
             Expasy expasy = new Expasy();
             BufferedReader in = doExpasyRequest(ec);
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                expasy = getExpasy(expasy, inputLine);
+                expasy = getExpasy(expasy, inputLine, isGetUniProtAnnotation);
             }
             in.close();
             return expasy;
@@ -39,7 +39,7 @@ public class ExpasyRequest {
     }
 
     private BufferedReader doExpasyRequest(String ec) throws IOException {
-        URL url = new URL( URL_GET_TXT_DATA + ec + EXTENSION_TXT_DATA);
+        URL url = new URL( URL_GET_TXT_DATA + ec.toUpperCase().replaceAll("EC:","").replaceAll("-","").trim() + EXTENSION_TXT_DATA);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setConnectTimeout(5000);
@@ -48,7 +48,7 @@ public class ExpasyRequest {
                 new InputStreamReader(con.getInputStream()));
     }
 
-    private Expasy getExpasy(Expasy expasy, String line){
+    private Expasy getExpasy(Expasy expasy, String line, boolean isGetUniProtAnnotation){
         String identification = line.substring(0,2);
         String[] data = line.split("   ");
 
@@ -73,14 +73,10 @@ public class ExpasyRequest {
                 } else if (data[1].toUpperCase().contains("INTENZ")) {
                     expasy.setIntEnz(data[1]);
                 } else {
-                    String[] uniProtLine = data[1].split(";");
-                    for (int i = 0; i <= 1; i++) {
-                        String[] uniProtData = uniProtLine[1].split(";");
-                        for (int indUniProtData = 0; indUniProtData <= 1; indUniProtData++) {
-                            UniprotSwissProt uniprot = new UniprotSwissProtRequest().getUniprotSwissProtDescription(uniProtData[0].split(",")[0]);
-                            if (uniprot != null)
-                                expasy.getUniprotSwissProtData().add(uniprot);
-                        }
+
+                    if (isGetUniProtAnnotation) {
+
+                        getUniprotSwissProtAnnotation(expasy, data[1]);
                     }
                 }
                 break;
@@ -89,6 +85,21 @@ public class ExpasyRequest {
 
         return expasy;
 
+    }
+
+    private void getUniprotSwissProtAnnotation(Expasy expasy, String uniProtLine) {
+        String[] uniprotKey = uniProtLine.split(";");
+
+        for (int i = 0; i < uniprotKey.length; i++) {
+
+            String[] uniProtData = uniprotKey[i].split(",");
+
+            String uniprotId = uniProtData[0].trim();
+            UniprotSwissProt uniprot = new UniprotSwissProtRequest().getUniprotSwissProtDescription(uniprotId);
+
+            if (uniprot != null)
+                expasy.getUniprotSwissProtData().add(uniprot);
+        }
     }
 
     public StringBuffer getExpasyECDescriptionExample(){
