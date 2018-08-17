@@ -3,13 +3,10 @@ package http;
 import dto.Expasy;
 import dto.UniprotSwissProt;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExpasyRequest {
 
@@ -130,5 +127,40 @@ public class ExpasyRequest {
         }
 
         return null;
+    }
+
+    public BufferedReader doModuleRequest(String KO) throws IOException {
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("unclassified", "K00134");
+        parameters.put("mode","complete+ng1+ng2");
+
+
+        StringBuilder postData = new StringBuilder();
+        for (Map.Entry<String,Object> param : parameters.entrySet()) {
+            if (postData.length() != 0) postData.append('&');
+            postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+            postData.append('=');
+            postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+        }
+        byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+        URL url = new URL( "http://www.genome.jp/kegg-bin/search_module_object");
+        HttpURLConnection con = (HttpURLConnection)url.openConnection();
+        con.setRequestMethod("POST");
+//        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        con.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+        con.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)");
+        con.setDoOutput(true);
+        con.getOutputStream().write(postDataBytes);
+        con.getOutputStream().flush();
+
+        Reader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+
+        for (int c; (c = in.read()) >= 0;)
+            System.out.print((char)c);
+
+        return null;
+
     }
 }
