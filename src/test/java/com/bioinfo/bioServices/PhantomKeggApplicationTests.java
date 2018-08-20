@@ -16,16 +16,14 @@ import static junit.framework.TestCase.assertTrue;
 @SpringBootTest
 public class PhantomKeggApplicationTests {
 
-	@Before
-
-	public void setUp() throws Exception {
-
+	@Test
+	public void contextLoads() {
 	}
 
 /*
 	@Test
 
-*/
+
 	public void testSearchInGooglePage() {
 
 		System.setProperty("phantomjs.binary.path", "phantomjs");
@@ -46,12 +44,12 @@ public class PhantomKeggApplicationTests {
 chromedriver
 		 *           poderia buscar o botão search e fazer o submit tb.
 
-		 */
+
 
 		inputTextGoogle.submit();
 
 		assertTrue(true);
 
 	}
-
+*/
 }

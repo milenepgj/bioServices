@@ -16,16 +16,13 @@ import static junit.framework.TestCase.assertTrue;
 @SpringBootTest
 public class SeleniumKeggApplicationTests {
 
-	@Before
-
-	public void setUp() throws Exception {
-
+	@Test
+	public void contextLoads() {
 	}
 
 /*
 	@Test
 
-*/
 	public void testSearchInGooglePage() {
 
 		System.setProperty("webdriver.chrome.driver", "external_libs/chromedriver");
@@ -42,16 +39,11 @@ public class SeleniumKeggApplicationTests {
 
 		inputTextGoogle.sendKeys("ko:K01803");
 
-		/*           faz um submit na página
-
-		 *           poderia buscar o botão search e fazer o submit tb.
-
-		 */
 
 		inputTextGoogle.submit();
 
 		assertTrue(true);
 
 	}
-
+*/
 }
