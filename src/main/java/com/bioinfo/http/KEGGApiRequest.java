@@ -1,7 +1,8 @@
-package http;
+package com.bioinfo.http;
 
-import dto.Expasy;
-import dto.UniprotSwissProt;
+import com.bioinfo.dto.Expasy;
+import com.bioinfo.dto.KEGGData;
+import com.bioinfo.dto.UniprotSwissProt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,23 +11,30 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class ExpasyRequest {
+public class KEGGApiRequest {
 
-    private String URL_GET_TXT_DATA = "https://enzyme.expasy.org/EC/";
+    private String URL_GET_TXT_DATA = "http://rest.kegg.jp/get/";
     private String EXTENSION_TXT_DATA = ".txt";
 
-    public Expasy getExpasyECData(String ec, boolean isGetUniProtAnnotation){
+    public KEGGData getKeggApiInfo(String hitBlastKegg){
+
+        KEGGData keggData = new KEGGData();
 
         try {
-            Expasy expasy = new Expasy();
-            BufferedReader in = doExpasyRequest(ec);
+            BufferedReader in = doKeggApiGet(hitBlastKegg);
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                expasy = getExpasy(expasy, inputLine, isGetUniProtAnnotation);
+                System.out.println(inputLine);
+                keggData = getKEGGData(keggData, inputLine);
+                if (keggData.getPathway() != null){
+                    break;
+                }
             }
             in.close();
-            return expasy;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (ProtocolException e) {
@@ -34,12 +42,11 @@ public class ExpasyRequest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return null;
+        return keggData;
     }
 
-    private BufferedReader doExpasyRequest(String ec) throws IOException {
-        URL url = new URL( URL_GET_TXT_DATA + ec.toUpperCase().replaceAll("EC:","").replaceAll("-","").trim() + EXTENSION_TXT_DATA);
+    private BufferedReader doKeggApiGet(String hitBlastKegg) throws IOException {
+        URL url = new URL( URL_GET_TXT_DATA + hitBlastKegg);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setConnectTimeout(5000);
@@ -48,43 +55,32 @@ public class ExpasyRequest {
                 new InputStreamReader(con.getInputStream()));
     }
 
-    private Expasy getExpasy(Expasy expasy, String line, boolean isGetUniProtAnnotation){
-        String identification = line.substring(0,2);
-        String[] data = line.split("   ");
+    private KEGGData getKEGGData(KEGGData keggData, String line){
+        String identification = line.substring(0,line.indexOf(" "));
 
-        switch (identification) {
-            case "ID":
-                expasy.setEc(data[1]);
-                break;
-            case "DE":
-                expasy.setDescription(data[1]);
-                break;
-            case "DR": {
-                if (data[1].contains("BRENDA")) {
-                    expasy.setBrenda(data[1]);
-                } else if (data[1].contains("KEGG")) {
-                    expasy.setKegg(data[1]);
-                } else if (data[1].toUpperCase().contains("METACYC")) {
-                    expasy.setKegg(data[1]);
-                } else if (data[1].toUpperCase().contains("IUBMB")) {
-                    expasy.setIubmb(data[1]);
-                } else if (data[1].toUpperCase().contains("MEDLINE")) {
-                    expasy.setMedline(data[1]);
-                } else if (data[1].toUpperCase().contains("INTENZ")) {
-                    expasy.setIntEnz(data[1]);
-                } else {
-
-                    if (isGetUniProtAnnotation) {
-
-                        getUniprotSwissProtAnnotation(expasy, data[1]);
-                    }
-                }
-                break;
-            }
+        if (identification.equals("ENTRY")) {
+            keggData.setEntry(getData(line, identification, " "));
+        }else if (identification.equals("DEFINITION")) {
+            keggData.setDefinition(getData(line, identification, " "));
+        }else if (identification.equals("ORTHOLOGY")){
+            keggData.setOrthologyKo(getData(line, identification,"|"));
+        }else if (identification.equals("ORGANISM")){
+            keggData.setOrganism(getData(line, identification," "));
+        }else if (identification.equals("PATHWAY")){
+            keggData.setPathway(getData(line, identification, " "));
         }
 
-        return expasy;
+        return keggData;
 
+    }
+
+    private String getData(String line, String identification, String delimiter) {
+        return Arrays.asList(line.replaceAll(identification,"")
+                .split(" "))
+                .stream()
+                .filter(
+                        item -> !item.isEmpty())
+                .collect(Collectors.joining(delimiter));
     }
 
     private void getUniprotSwissProtAnnotation(Expasy expasy, String uniProtLine) {
@@ -131,4 +127,5 @@ public class ExpasyRequest {
 
         return null;
     }
+
 }
