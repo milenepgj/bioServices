@@ -4,19 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Expasy {
-    String ec;
-    String description;
-    String reaction;
-    String brenda;
-    String ec2pdb;
-    String explorEnz;
-    String priam;
-    String kegg;
-    String iubmb;
-    String intEnz;
-    String medline;
-    String metaCyc;
-    List<UniprotSwissProt> uniprotSwissProtData;
+
+    private String ec;
+    private String description;
+    private String reaction;
+    private String brenda;
+    private String ec2pdb;
+    private String explorEnz;
+    private String priam;
+    private String kegg;
+    private String iubmb;
+    private String intEnz;
+    private String medline;
+    private String metaCyc;
+    private List<UniprotSwissProt> uniprotSwissProtData;
 
     public String getEc() {
         return ec;
