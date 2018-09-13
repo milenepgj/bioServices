@@ -1,8 +1,8 @@
 package com.bioinfo.http;
 
-import com.bioinfo.dto.Expasy;
-import com.bioinfo.dto.KEGGData;
-import com.bioinfo.dto.UniprotSwissProt;
+import bio.domain.Expasy;
+import bio.domain.KEGGData;
+import bio.domain.UniprotSwissProt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +12,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class KEGGApiRequest {

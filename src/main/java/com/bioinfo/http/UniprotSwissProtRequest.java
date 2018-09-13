@@ -1,6 +1,6 @@
 package com.bioinfo.http;
 
-import com.bioinfo.dto.UniprotSwissProt;
+import bio.domain.UniprotSwissProt;
 
 import java.io.BufferedReader;
 import java.io.IOException;

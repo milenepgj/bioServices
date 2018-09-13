@@ -1,7 +1,7 @@
 package com.bioinfo.http;
 
-import com.bioinfo.dto.Expasy;
-import com.bioinfo.dto.UniprotSwissProt;
+import bio.domain.Expasy;
+import bio.domain.UniprotSwissProt;
 
 import java.io.BufferedReader;
 import java.io.IOException;

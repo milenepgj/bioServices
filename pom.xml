@@ -9,14 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>bioServices</name>
-	<description>Demo project for Spring Boot</description>
-
-<!--	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.4.RELEASE</version>
-		<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;
-	</parent>-->
+	<description>Some services request to biologic databases</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,6 +42,11 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>bio.domain</groupId>
+			<artifactId>bioDomain</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
