@@ -21,7 +21,7 @@ public class KEGGApiRequest {
 
     public KEGGData getKeggApiInfo(String hitBlastKegg){
 
-        KEGGData keggData = new KEGGData();
+        KEGGData keggData = null;
 
         try {
             BufferedReader in = doKeggApiGet(hitBlastKegg);
@@ -41,6 +41,10 @@ public class KEGGApiRequest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (keggData != null)
+            keggData.setBlastHitId(hitBlastKegg);
+
         return keggData;
     }
 
@@ -55,18 +59,30 @@ public class KEGGApiRequest {
     }
 
     private KEGGData getKEGGData(KEGGData keggData, String line){
-        String identification = line.substring(0,line.indexOf(" "));
 
-        if (identification.equals("ENTRY")) {
-            keggData.setEntry(getData(line, identification, " "));
-        }else if (identification.equals("DEFINITION")) {
-            keggData.setDefinition(getData(line, identification, " "));
-        }else if (identification.equals("ORTHOLOGY")){
-            keggData.setOrthologyKo(getData(line, identification,"|"));
-        }else if (identification.equals("ORGANISM")){
-            keggData.setOrganism(getData(line, identification," "));
-        }else if (identification.equals("PATHWAY")){
-            keggData.setPathway(getData(line, identification, " "));
+        try{
+
+            String identification = line.substring(0,line.indexOf(" "));
+
+            if (identification != ""){
+
+                if (keggData == null)
+                    keggData = new KEGGData();
+
+                if (identification.equals("ENTRY")) {
+                    keggData.setEntry(getData(line, identification, " "));
+                }else if (identification.equals("DEFINITION")) {
+                    keggData.setDefinition(getData(line, identification, " "));
+                }else if (identification.equals("ORTHOLOGY")){
+                    keggData.setOrthologyKo(getKOData(line, identification,"|"));
+                }else if (identification.equals("ORGANISM")){
+                    keggData.setOrganism(getData(line, identification," "));
+                }else if (identification.equals("PATHWAY")){
+                    keggData.setPathway(getData(line, identification, " "));
+                }
+            }
+        }catch (StringIndexOutOfBoundsException e){
+            return keggData;
         }
 
         return keggData;
@@ -81,6 +97,16 @@ public class KEGGApiRequest {
                         item -> !item.isEmpty())
                 .collect(Collectors.joining(delimiter));
     }
+
+    private String getKOData(String line, String identification, String delimiter) {
+        return Arrays.asList(line.replaceAll(identification,"")
+                .split(" "))
+                .stream()
+                .filter(
+                        item -> (!item.isEmpty() && item.substring(0,1).equals("K")))
+                .collect(Collectors.joining(delimiter));
+    }
+
 
     private void getUniprotSwissProtAnnotation(Expasy expasy, String uniProtLine) {
         String[] uniprotKey = uniProtLine.split(";");

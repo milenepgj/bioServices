@@ -28,7 +28,7 @@ public class KEGGRequest {
 
         List<KEGGModule> modules = new ArrayList<KEGGModule>();
 
-        kosToSend = "ko:K01803\n" +
+/*        kosToSend = "ko:K01803\n" +
                 "ko:K00134\n" +
                 "ko:K00150\n" +
                 "ko:K00927\n" +
@@ -39,7 +39,7 @@ public class KEGGRequest {
                 "ko:K15635\n" +
                 "ko:K01689\n" +
                 "ko:K00873\n" +
-                "ko:K12406";
+                "ko:K12406";*/
 
         System.setProperty("phantomjs.binary.path", "/home/milene.guimaraes/dev/programas/phantomjs-2.1.1-linux-x86_64/bin/phantomjs");
         WebDriver driver  = new PhantomJSDriver();
