@@ -27,7 +27,7 @@ public class KEGGApiRequest {
             BufferedReader in = doKeggApiGet(hitBlastKegg);
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println(inputLine);
+                //System.out.println(inputLine);
                 keggData = getKEGGData(keggData, inputLine);
                 if (keggData.getPathway() != null){
                     break;

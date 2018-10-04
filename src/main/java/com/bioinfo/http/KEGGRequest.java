@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import util.UtilMethods;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,10 +24,18 @@ import java.util.regex.Pattern;
 public class KEGGRequest {
 
     private String URL_KEGG_MODULE = "https://www.genome.jp";
+    private UtilMethods util = new UtilMethods();
+
+    public KEGGRequest() {
+        System.setProperty("phantomjs.binary.path", "/home/milene.guimaraes/dev/programas/phantomjs-2.1.1-linux-x86_64/bin/phantomjs");
+    }
 
     public List<KEGGModule> getModules(String kosToSend) {
 
         List<KEGGModule> modules = new ArrayList<KEGGModule>();
+
+        WebDriver driver = new PhantomJSDriver();
+        driver.get("https://www.genome.jp/kegg/tool/map_module1.html");
 
 /*        kosToSend = "ko:K01803\n" +
                 "ko:K00134\n" +
@@ -41,14 +50,13 @@ public class KEGGRequest {
                 "ko:K00873\n" +
                 "ko:K12406";*/
 
-        System.setProperty("phantomjs.binary.path", "/home/milene.guimaraes/dev/programas/phantomjs-2.1.1-linux-x86_64/bin/phantomjs");
-        WebDriver driver  = new PhantomJSDriver();
-        driver.get("https://www.genome.jp/kegg/tool/map_module1.html");
         WebElement inputTextGoogle = driver.findElement(By.name("unclassified"));
         inputTextGoogle.sendKeys(kosToSend);
         inputTextGoogle.submit();
-
         String HTMLPage = driver.getPageSource();
+
+        driver.quit();
+
         Pattern linkPattern = Pattern.compile("(<a[^>]+>.+?</a>)",  Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
         Matcher pageMatcher = linkPattern.matcher(HTMLPage);
         ArrayList<String> links = new ArrayList<String>();
@@ -56,7 +64,6 @@ public class KEGGRequest {
             if (pageMatcher.group().contains("kegg-bin"))
                 links.add(pageMatcher.group());
         }
-
 
         for (int i = 0; i < links.size(); i++) {
             String[] href = links.get(i).split("/");
@@ -73,12 +80,12 @@ public class KEGGRequest {
                     in.close();
 
                 if (listKOs.size() > 0){
-                    boolean isComplete = false;
 
                     KEGGModule moduleKegg = new KEGGModule();
                     moduleKegg.setModule(moduleCode);
+                    moduleKegg.setKosFromEC(util.getKosToCompareList(kosToSend));
                     moduleKegg.setKos(getKoCodeList(listKOs));
-                    moduleKegg.setComplete(isComplete(moduleKegg.getKos(), kosToSend));
+                    moduleKegg.setComplete(util.isComplete(moduleKegg.getKos(), kosToSend));
                     modules.add(moduleKegg);
                 }
 
@@ -96,23 +103,7 @@ public class KEGGRequest {
 
     }
 
-    private boolean isComplete(List<String> listKOs, String kosToSend) {
 
-        return getMinusList(listKOs, getKosToCompareList(kosToSend)).size()>0?false:true;
-    }
-
-    private List<String> getMinusList(List<String> listOne, List<String> listTwo) {
-        List<String> added = new ArrayList<String>();
-        added.addAll(listOne);
-        added.removeAll(listTwo);
-        return added;
-    }
-
-    private List<String> getKosToCompareList(String kosToSend) {
-        List kosToSendList = Arrays.asList(kosToSend.replaceAll("ko:", "").split("\n"));
-        kosToSendList.sort(Comparator.naturalOrder());
-        return kosToSendList;
-    }
 
     private ArrayList<String> getModuleKOsList(String moduleCode, BufferedReader in) throws IOException {
         String inputLine;
